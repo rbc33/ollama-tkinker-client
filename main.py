@@ -5,7 +5,11 @@ import threading
 from langchain_community.llms.ollama import Ollama
 from ollama_list import list_models
 
+
 BASE_URL = "http://192.168.0.100:11434"
+
+# Variable global para almacenar el modelo seleccionado
+SELECTED_MODEL = "llama3.1"
 
 
 class ChatApp:
@@ -13,18 +17,26 @@ class ChatApp:
         self.root = root
         self.root.title("Ollama Chat Interface")
 
-        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
 
         self.root.geometry("600x700")
 
+        # Frame para el dropdown
+        dropdown_frame = tk.Frame(root)
+        dropdown_frame.grid(
+            row=0, column=0, columnspan=3, sticky="w", pady=(10, 0), padx=10
+        )
+
         # Dropdown menu
         self.options = list_models()
         self.clicked = StringVar()
-        self.clicked.set("llama3.1")
+        self.clicked.set(SELECTED_MODEL)
+        self.clicked.trace("w", self.update_selected_model)
 
-        self.drop = OptionMenu(self.root, self.clicked, *self.options)
-        self.drop.grid(row=0, column=0, columnspan=3, pady=10, sticky="ew")
+        self.drop = OptionMenu(dropdown_frame, self.clicked, *self.options)
+        self.drop.config(width=20)
+        self.drop.pack(side="left")
 
         # Chat area
         self.chat_area = Text(root, wrap="word", state="disabled", width=40, height=20)
@@ -46,8 +58,10 @@ class ChatApp:
         send_button = Button(root, text="Enviar", command=self.send_message)
         send_button.grid(row=2, column=1, pady=10)
 
-        self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
+    def update_selected_model(self, *args):
+        global SELECTED_MODEL
+        SELECTED_MODEL = self.clicked.get()
+        self.display_message(f"Modelo seleccionado: {SELECTED_MODEL}")
 
     def send_message(self, event=None):
         user_input = self.entry_field.get()
@@ -55,7 +69,7 @@ class ChatApp:
             self.display_message(f"Usuario: {user_input}")
             threading.Thread(
                 target=self.generate_and_display,
-                args=(self.clicked.get(), user_input),
+                args=(SELECTED_MODEL, user_input),
                 daemon=True,
             ).start()
             self.entry_field.delete(0, "end")
