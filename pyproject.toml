@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "ollama-tk"
+version = "0.1.0"
+description = ""
+authors = ["rbc33 <ricardobenthem@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+langchain = "^0.2.15"
+langchain-community = "^0.2.14"
+tkhtmlview = "^0.3.1"
+markdown2 = "^2.5.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
